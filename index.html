@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>게임하며 탈출하기</title>
+
+    <style>
+        /* 기본 스타일 초기화 */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; font-family: 'Malgun Gothic', sans-serif; background-color: #333;
+        }
+        /* 시작 화면 스타일 */
+        #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); display: flex;
+            justify-content: center; align-items: center; z-index: 2000; color: #333;
+        }
+        #start-content {
+            background-color: white; padding: 30px 40px; border-radius: 15px;
+            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        #start-content h1 { margin-top: 0; }
+        #start-content input {
+            display: block; margin: 10px auto; width: 90%; padding: 10px;
+            font-size: 16px; border: 1px solid #ccc; border-radius: 5px;
+        }
+        #start-game-btn {
+            padding: 12px 30px; font-size: 18px; font-weight: bold; cursor: pointer;
+            border: none; border-radius: 5px; background-color: #28a745; color: white; margin-top: 20px;
+        }
+        /* 타이머 스타일 */
+        #timer {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.6); color: white; padding: 8px 20px;
+            border-radius: 10px; font-size: 24px; font-weight: bold; border: 2px solid #fff; z-index: 998;
+        }
+        /* 게임 컨테이너 */
+        #game-container { position: relative; max-width: 1200px; margin: auto; border: 2px solid #000; }
+        .room-background { width: 100%; display: block; }
+        .clickable-object { position: absolute; cursor: pointer; z-index: 10; }
+        #child-obj { top: 52%; left: 21%; width: 10%; height: 35%; }
+        #computer-obj { top: 61%; left: 44%; width: 16%; height: 20%; }
+        #wall-obj { top: 0; left: 80%; width: 20%; height: 100%; }
+        /* 인벤토리 스타일 */
+        #inventory {
+            position: fixed; bottom: 20px; left: 20px; background-color: rgba(0, 0, 0, 0.7);
+            color: white; padding: 10px 20px; border-radius: 10px; border: 2px solid #fff; z-index: 999;
+        }
+        #player-info {
+            padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #555;
+            font-size: 14px; font-weight: bold;
+        }
+        #inventory h3 { margin: 0 0 10px 0; }
+        #inventory ul { list-style: none; padding: 0; margin: 0; }
+        /* 모달 창 스타일 */
+        #modal-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); display: flex;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        #modal-content {
+            background-color: white; padding: 20px; border-radius: 15px;
+            text-align: center; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .hidden { display: none; }
+        #modal-content button {
+            padding: 10px 20px; font-size: 16px; cursor: pointer; border: none;
+            border-radius: 5px; background-color: #4CAF50; color: white;
+            margin-top: 15px; margin-left: 5px; margin-right: 5px;
+        }
+        #modal-content button.cancel-btn { background-color: #f44336; }
+        #modal-content input {
+            padding: 10px; font-size: 18px; text-align: center;
+            border: 2px solid #ccc; border-radius: 5px; width: 80%;
+        }
+    </style>
+</head>
+<body>
+    <div id="start-screen">
+        <div id="start-content">
+            <h1>게임하며 탈출하기</h1>
+            <p>참여자의 정보를 입력하고 게임을 시작하세요.</p>
+            <input type="text" id="player-grade" placeholder="학년 (예: 1)" autocomplete="off">
+            <input type="text" id="player-class" placeholder="반 (예: 3)" autocomplete="off">
+            <input type="text" id="player-name" placeholder="이름 (예: 홍길동)" autocomplete="off">
+            <button id="start-game-btn">게임 시작</button>
+        </div>
+    </div>
+    <div id="timer" class="hidden">00:00</div>
+    <div id="game-container" class="hidden">
+        <img src="https://i.ibb.co/W4d22K57/Whisk-storyboard3cedccf3dfb44c8c89c740a1.jpg" alt="게임 배경" class="room-background">
+        <div id="child-obj" class="clickable-object"></div>
+        <div id="computer-obj" class="clickable-object"></div>
+        <div id="wall-obj" class="clickable-object"></div>
+    </div>
+    <div id="inventory" class="hidden">
+        <div id="player-info"></div> 
+        <h3>📜 획득한 힌트</h3>
+        <ul id="hint-list"></ul>
+    </div>
+    <div id="modal-container" class="hidden">
+        <div id="modal-content"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ★ 디버깅 메시지 1: 스크립트가 로드되었는지 확인
+            console.log("페이지 로드 완료. 스크립트 실행 시작.");
+
+            const startScreen = document.getElementById('start-screen');
+            const startGameBtn = document.getElementById('start-game-btn');
+            const playerGradeInput = document.getElementById('player-grade');
+            const playerClassInput = document.getElementById('player-class');
+            const playerNameInput = document.getElementById('player-name');
+            const playerInfoDiv = document.getElementById('player-info');
+            const gameContainer = document.getElementById('game-container');
+            const inventory = document.getElementById('inventory');
+            const timerDiv = document.getElementById('timer');
+            const childObj = document.getElementById('child-obj');
+            const computerObj = document.getElementById('computer-obj');
+            const wallObj = document.getElementById('wall-obj');
+            const modalContainer = document.getElementById('modal-container');
+            const modalContent = document.getElementById('modal-content');
+            const hintList = document.getElementById('hint-list');
+
+            let hints = new Set();
+            let missileGame = { isRunning: false, animationFrameId: null, listeners: { keydown: null, keyup: null } };
+            let startTime = 0;
+            let timerInterval = null;
+
+            function initGame() {
+                console.log("initGame 함수 실행: 타이머와 게임 이벤트 리스너를 설정합니다.");
+                startTime = Date.now();
+                timerInterval = setInterval(updateTimer, 1000);
+                childObj.addEventListener('click', showChildProblem);
+                computerObj.addEventListener('click', startMissileGame);
+                wallObj.addEventListener('click', showEscapeModal);
+            }
+
+            startGameBtn.addEventListener('click', () => {
+                // ★ 디버깅 메시지 2: 버튼 클릭이 인식되었는지 확인
+                console.log("'게임 시작' 버튼 클릭됨!");
+
+                const grade = playerGradeInput.value.trim();
+                const p_class = playerClassInput.value.trim();
+                const name = playerNameInput.value.trim();
+
+                if (!grade || !p_class || !name) {
+                    alert('학년, 반, 이름을 모두 입력해주세요!');
+                    return;
+                }
+                
+                playerInfoDiv.textContent = `도전자: ${grade}학년 ${p_class}반 ${name}`;
+
+                startScreen.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                inventory.classList.remove('hidden');
+                timerDiv.classList.remove('hidden');
+
+                initGame();
+            });
+            
+            function updateTimer() {
+                const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+                const seconds = String(elapsedTime % 60).padStart(2, '0');
+                timerDiv.textContent = `${minutes}:${seconds}`;
+            }
+            
+            function showChildProblem() {
+                if (hints.has("01")) { alert("이미 힌트를 확인했습니다."); return; }
+                modalContent.innerHTML = `<h2>친구의 쪽지</h2><p>"내 생일은 1월이야. 이걸로 첫 번째 힌트를 풀어봐!"</p><button id="close-modal-btn">확인</button>`;
+                showModal();
+                document.getElementById('close-modal-btn').onclick = () => {
+                    addHint("친구의 생일 = 01"); hints.add("01"); closeModal();
+                };
+            }
+
+            function startMissileGame() {
+                if (hints.has("15")) { alert("게임은 이미 클리어했습니다."); return; }
+                modalContent.innerHTML = `
+                    <h2>미사일 게임</h2><p>날아오는 운석을 모두 파괴하세요!</p>
+                    <canvas id="game-canvas" width="480" height="320" style="background-color: #1a1a2e;"></canvas>
+                    <div>키보드: ← → / 스페이스바</div>
+                    <button id="giveup-missile-game" class="cancel-btn">포기하고 닫기</button>`;
+                showModal();
+                document.getElementById('giveup-missile-game').onclick = () => { stopMissileGame(); closeModal(); };
+                setTimeout(runGame, 50);
+            }
+
+            function showEscapeModal() {
+                modalContent.innerHTML = `
+                    <h2>비밀번호 입력</h2><p>획득한 힌트를 조합하여 비밀번호를 입력하세요.</p>
+                    <input type="text" id="password-input" maxlength="4" placeholder="4자리 숫자" autocomplete="off">
+                    <button id="submit-password">탈출 시도</button><button id="cancel-escape" class="cancel-btn">취소</button>`;
+                showModal();
+                document.getElementById('submit-password').onclick = () => {
+                    if (document.getElementById('password-input').value === "0115") {
+                        clearInterval(timerInterval);
+                        const finalTime = timerDiv.textContent;
+                        alert(`정답! 문이 열립니다. 탈출 성공!\n\n소요시간: ${finalTime}`);
+                        window.location.reload();
+                    } else { alert("비밀번호가 틀렸습니다."); }
+                };
+                document.getElementById('cancel-escape').onclick = closeModal;
+            }
+
+            function addHint(text) {
+                if ([...hintList.children].some(li => li.textContent === text)) return;
+                const newHint = document.createElement('li');
+                newHint.textContent = text;
+                hintList.appendChild(newHint);
+            }
+
+            function showModal() { modalContainer.classList.remove('hidden'); }
+            function closeModal() { modalContainer.classList.add('hidden'); }
+            
+            function stopMissileGame() {
+                if (missileGame.isRunning) {
+                    document.removeEventListener('keydown', missileGame.listeners.keydown);
+                    document.removeEventListener('keyup', missileGame.listeners.keyup);
+                    cancelAnimationFrame(missileGame.animationFrameId);
+                    missileGame.isRunning = false;
+                    missileGame.listeners.keydown = null;
+                    missileGame.listeners.keyup = null;
+                }
+            }
+            
+            function runGame() {
+                const canvas = document.getElementById('game-canvas');
+                if (!canvas || missileGame.isRunning) return;
+                const ctx = canvas.getContext('2d');
+                missileGame.isRunning = true;
+                let player = { x: canvas.width / 2 - 15, y: canvas.height - 30, width: 30, height: 20, speed: 5 };
+                let bullets = []; let targets = []; let keys = {};
+                for(let i=0; i<5; i++) { targets.push({x: 50 + i * 80, y: 30, width: 40, height: 20, active: true}); }
+                missileGame.listeners.keydown = (e) => { keys[e.code] = true; };
+                missileGame.listeners.keyup = (e) => { keys[e.code] = false; };
+                document.addEventListener('keydown', missileGame.listeners.keydown);
+                document.addEventListener('keyup', missileGame.listeners.keyup);
+                function gameLoop() {
+                    if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
+                    if (keys['ArrowRight'] && player.x < canvas.width - player.width) player.x += player.speed;
+                    if (keys['Space']) {
+                        if (bullets.length < 5) { bullets.push({x: player.x + player.width/2 - 2.5, y: player.y, width: 5, height: 10, speed: 7}); }
+                        keys['Space'] = false;
+                    }
+                    for (let bIndex = bullets.length - 1; bIndex >= 0; bIndex--) {
+                        let bullet = bullets[bIndex]; bullet.y -= bullet.speed;
+                        if (bullet.y < 0) { bullets.splice(bIndex, 1); continue; }
+                        for (let tIndex = targets.length - 1; tIndex >= 0; tIndex--) {
+                            let target = targets[tIndex];
+                            if (target.active && bullet.x < target.x + target.width && bullet.x + bullet.width > target.x &&
+                                bullet.y < target.y + target.height && bullet.y + bullet.height > target.y) {
+                                target.active = false; bullets.splice(bIndex, 1); break; 
+                            }
+                        }
+                    }
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#16a085'; ctx.fillRect(player.x, player.y, player.width, player.height);
+                    ctx.fillStyle = '#f1c40f'; bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
+                    ctx.fillStyle = '#e74c3c'; targets.forEach(t => { if(t.active) ctx.fillRect(t.x, t.y, t.width, t.height); });
+                    if (targets.every(t => !t.active)) {
+                        stopMissileGame();
+                        setTimeout(() => {
+                            alert("게임 클리어! 두 번째 힌트 '15'를 획득했습니다.");
+                            addHint("게임 클리어 점수 = 15"); hints.add("15"); closeModal();
+                        }, 200);
+                        return;
+                    }
+                    if (missileGame.isRunning) {
+                        missileGame.animationFrameId = requestAnimationFrame(gameLoop);
+                    }
+                }
+                gameLoop();
+            }
+        });
+    </script>
+
+</body>
+</html>
