@@ -1,283 +1,533 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>게임하며 탈출하기</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>감옥 탈출</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: 'Malgun Gothic', sans-serif;
+    }
+    .scene {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        display: none;
+    }
+    #scene1 {
+        background-image: url('https://i.ibb.co/fYRTS5kj/Whisk-storyboardfff99d811e714b7b82527f8b-2.jpg');
+    }
+    #scene2 {
+        background-image: url('https://i.ibb.co/dsgpmqhj/Whisk-469b110f7e.jpg');
+    }
+    #scene3 {
+        background-image: url('https://i.ibb.co/ZpRPRK9V/Whisk-1cc4ab5545.jpg');
+    }
+    .clickable {
+        position: absolute;
+        cursor: pointer;
+        /* MODIFIED: Yellow border removed */
+        background-color: rgba(255, 255, 0, 0);
+    }
+    /* Scene 1 Clickable Areas */
+    #blue-shirt { top: 30%; left: 83%; width: 10%; height: 25%; }
+    #bookshelf { top: 55%; left: 45%; width: 15%; height: 30%; }
+    #window { top: 10%; left: 10%; width: 30%; height: 50%; }
+    #blanket { top: 70%; left: 65%; width: 30%; height: 25%; }
 
-    <style>
-        /* 기본 스타일 초기화 */
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; font-family: 'Malgun Gothic', sans-serif; background-color: #333;
-        }
-        /* 시작 화면 스타일 */
-        #start-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.85); display: flex;
-            justify-content: center; align-items: center; z-index: 2000; color: #333;
-        }
-        #start-content {
-            background-color: white; padding: 30px 40px; border-radius: 15px;
-            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        #start-content h1 { margin-top: 0; }
-        #start-content input {
-            display: block; margin: 10px auto; width: 90%; padding: 10px;
-            font-size: 16px; border: 1px solid #ccc; border-radius: 5px;
-        }
-        #start-game-btn {
-            padding: 12px 30px; font-size: 18px; font-weight: bold; cursor: pointer;
-            border: none; border-radius: 5px; background-color: #28a745; color: white; margin-top: 20px;
-        }
-        /* 타이머 스타일 */
-        #timer {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.6); color: white; padding: 8px 20px;
-            border-radius: 10px; font-size: 24px; font-weight: bold; border: 2px solid #fff; z-index: 998;
-        }
-        /* 게임 컨테이너 */
-        #game-container { position: relative; max-width: 1200px; margin: auto; border: 2px solid #000; }
-        .room-background { width: 100%; display: block; }
-        .clickable-object { position: absolute; cursor: pointer; z-index: 10; }
-        #child-obj { top: 52%; left: 21%; width: 10%; height: 35%; }
-        #computer-obj { top: 61%; left: 44%; width: 16%; height: 20%; }
-        #wall-obj { top: 0; left: 80%; width: 20%; height: 100%; }
-        /* 인벤토리 스타일 */
-        #inventory {
-            position: fixed; bottom: 20px; left: 20px; background-color: rgba(0, 0, 0, 0.7);
-            color: white; padding: 10px 20px; border-radius: 10px; border: 2px solid #fff; z-index: 999;
-        }
-        #player-info {
-            padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #555;
-            font-size: 14px; font-weight: bold;
-        }
-        #inventory h3 { margin: 0 0 10px 0; }
-        #inventory ul { list-style: none; padding: 0; margin: 0; }
-        /* 모달 창 스타일 */
-        #modal-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); display: flex;
-            justify-content: center; align-items: center; z-index: 1000;
-        }
-        #modal-content {
-            background-color: white; padding: 20px; border-radius: 15px;
-            text-align: center; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .hidden { display: none; }
-        #modal-content button {
-            padding: 10px 20px; font-size: 16px; cursor: pointer; border: none;
-            border-radius: 5px; background-color: #4CAF50; color: white;
-            margin-top: 15px; margin-left: 5px; margin-right: 5px;
-        }
-        #modal-content button.cancel-btn { background-color: #f44336; }
-        #modal-content input {
-            padding: 10px; font-size: 18px; text-align: center;
-            border: 2px solid #ccc; border-radius: 5px; width: 80%;
-        }
-    </style>
+    /* Scene 2 Clickable Areas */
+    #tree { top: 30%; left: 45%; width: 15%; height: 50%; }
+    #searchlight { top: 30%; left: 75%; width: 20%; height: 20%; }
+    #right-wall { top: 25%; left: 85%; width: 15%; height: 50%; }
+
+    /* Scene 3 Clickable Areas */
+    #wall { top: 20%; left: 75%; width: 25%; height: 50%; }
+    #gate { top: 30%; left: 25%; width: 50%; height: 60%; }
+    #exit-sign { top: 20%; left: 40%; width: 20%; height: 10%; }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 300px;
+        text-align: center;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* === MINIGAME STYLES START === */
+    #circle-game-wrapper {
+        display: none;
+        position: fixed;
+        z-index: 50;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.7);
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    #circle-game-container {
+        width: 600px;
+        height: 400px;
+        border: 3px solid #333;
+        position: relative;
+        background-color: #000000;
+        overflow: hidden;
+    }
+    #cg-player { position: absolute; width: 40px; height: 40px; background-color: #007bff; }
+    #cg-enemy { position: absolute; width: 100px; height: 100px; background-color: #ffc107; border-radius: 50%; }
+    #cg-info { margin-top: 15px; font-size: 1.2em; color: #fff; }
+    .cg-wall { position: absolute; background-color: #34495e; }
+
+    #parkour-game-container {
+        display: none;
+        position: fixed;
+        z-index: 50;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #2c3e50;
+        overflow: hidden;
+    }
+    #parkour-player { position: absolute; width: 30px; height: 30px; background-color: #2ecc71; }
+    .platform { position: absolute; height: 20px; background-color: #95a5a6; }
+    #parkour-goal { position: absolute; width: 50px; height: 50px; background: gold; box-shadow: 0 0 20px gold; border-radius: 5px; }
+    .spike { position: absolute; width: 20px; height: 20px; background-color: #e74c3c; }
+    /* === MINIGAME STYLES END === */
+    
+    /* === INTRO/ENDING SCREEN STYLES === */
+    .overlay-screen {
+        display: flex;
+        position: fixed;
+        z-index: 200;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: white;
+    }
+    .overlay-content {
+        padding: 40px;
+        max-width: 600px;
+        animation: fadeIn 1s ease-in-out;
+    }
+    .overlay-content h2 {
+        font-size: 2.8em;
+        margin-bottom: 20px;
+        color: #f1c40f;
+    }
+    .overlay-content p {
+        font-size: 1.2em;
+        line-height: 1.7;
+        margin-bottom: 40px;
+    }
+    .overlay-content button {
+        padding: 15px 30px;
+        font-size: 1.2em;
+        font-weight: bold;
+        cursor: pointer;
+        border: 2px solid white;
+        background-color: transparent;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .overlay-content button:hover {
+        background-color: white;
+        color: black;
+    }
+    #ending-screen {
+        display: none; /* Hidden by default */
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 </head>
 <body>
-    <div id="start-screen">
-        <div id="start-content">
-            <h1>게임하며 탈출하기</h1>
-            <p>참여자의 정보를 입력하고 게임을 시작하세요.</p>
-            <input type="text" id="player-grade" placeholder="학년 (예: 1)" autocomplete="off">
-            <input type="text" id="player-class" placeholder="반 (예: 3)" autocomplete="off">
-            <input type="text" id="player-name" placeholder="이름 (예: 홍길동)" autocomplete="off">
-            <button id="start-game-btn">게임 시작</button>
-        </div>
-    </div>
-    <div id="timer" class="hidden">00:00</div>
-    <div id="game-container" class="hidden">
-        <img src="https://i.ibb.co/W4d22K57/Whisk-storyboard3cedccf3dfb44c8c89c740a1.jpg" alt="게임 배경" class="room-background">
-        <div id="child-obj" class="clickable-object"></div>
-        <div id="computer-obj" class="clickable-object"></div>
-        <div id="wall-obj" class="clickable-object"></div>
-    </div>
-    <div id="inventory" class="hidden">
-        <div id="player-info"></div> 
-        <h3>📜 획득한 힌트</h3>
-        <ul id="hint-list"></ul>
-    </div>
-    <div id="modal-container" class="hidden">
-        <div id="modal-content"></div>
-    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // ★ 디버깅 메시지 1: 스크립트가 로드되었는지 확인
-            console.log("페이지 로드 완료. 스크립트 실행 시작.");
+<!-- Story/Ending Screens -->
+<div id="introduction-screen" class="overlay-screen">
+    <div class="overlay-content">
+        <h2>탈출의 시작</h2>
+        <!-- MODIFIED: Instructions added -->
+        <p>
+            나는 억울하게 감옥에 갇혔다.<br>
+            하지만 절망 속 한 줄기 빛...<br>
+            내가 들어온 이 방은 전설적인 탈옥 고수가 머물던 곳이라고 한다.<br>
+            그가 남긴 흔적을 찾아 반드시 탈출해야 한다!
+            <br><br>
+            <strong>[조작법]</strong><br>
+            - 상호작용: 마우스 클릭<br>
+            - 미니게임: W, A, S, D
+            <br><br>
+            <i>(튜토리얼: 게임이 시작되면, 먼저 책장을 클릭해보세요.)</i>
+        </p>
+        <button id="start-button">게임 시작</button>
+    </div>
+</div>
 
-            const startScreen = document.getElementById('start-screen');
-            const startGameBtn = document.getElementById('start-game-btn');
-            const playerGradeInput = document.getElementById('player-grade');
-            const playerClassInput = document.getElementById('player-class');
-            const playerNameInput = document.getElementById('player-name');
-            const playerInfoDiv = document.getElementById('player-info');
-            const gameContainer = document.getElementById('game-container');
-            const inventory = document.getElementById('inventory');
-            const timerDiv = document.getElementById('timer');
-            const childObj = document.getElementById('child-obj');
-            const computerObj = document.getElementById('computer-obj');
-            const wallObj = document.getElementById('wall-obj');
-            const modalContainer = document.getElementById('modal-container');
-            const modalContent = document.getElementById('modal-content');
-            const hintList = document.getElementById('hint-list');
+<div id="ending-screen" class="overlay-screen">
+    <div class="overlay-content">
+        <h2>탈출 성공!</h2>
+        <p>마침내 당신은 모든 암호를 풀고 감옥 문을 열었습니다.<br>자유를 만끽하세요!</p>
+        <button id="restart-button">다시 플레이</button>
+    </div>
+</div>
 
-            let hints = new Set();
-            let missileGame = { isRunning: false, animationFrameId: null, listeners: { keydown: null, keyup: null } };
-            let startTime = 0;
-            let timerInterval = null;
+<!-- Main Game Scenes -->
+<div id="scene1" class="scene" style="display: none;">
+    <div id="blue-shirt" class="clickable" onclick="showAlert('옷 안에 옛날에 탈옥했던 사람의 쪽지가 있다. 쪽지에 [내 생일은-월-일]이라 적혀 있다.')"></div>
+    <div id="bookshelf" class="clickable" onclick="showAlert('책장에는 오래된 책들이 꽂혀있다. 그 중 한 책에 [나무가 6월 3일에 심어졌다]이라고 적혀있다. 잘 기억해 두는 게 좋겠다.')"></div>
+    <div id="window" class="clickable" onclick="showPasswordModal(1, '0115')"></div>
+    <div id="blanket" class="clickable" onclick="showAlert('이불을 들춰보니 1월 15일에[오늘은 나의 생일]이라고 적힌 달력이 있다.')"></div>
+</div>
 
-            function initGame() {
-                console.log("initGame 함수 실행: 타이머와 게임 이벤트 리스너를 설정합니다.");
-                startTime = Date.now();
-                timerInterval = setInterval(updateTimer, 1000);
-                childObj.addEventListener('click', showChildProblem);
-                computerObj.addEventListener('click', startMissileGame);
-                wallObj.addEventListener('click', showEscapeModal);
+<div id="scene2" class="scene">
+    <div id="tree" class="clickable" onclick="showAlert('나무에 작게 뭐가 새겨져 있다. 어두워서 잘 보이지 않는다.')"></div>
+    <div id="searchlight" class="clickable" onclick="startCircleGame()"></div>
+    <div id="right-wall" class="clickable" onclick="showPasswordModal(2, '0603')"></div>
+</div>
+
+<div id="scene3" class="scene">
+    <div id="wall" class="clickable" onclick="startParkourGame()"></div>
+    <div id="gate" class="clickable" onclick="showPasswordModal(3, '9636')"></div>
+    <div id="exit-sign" class="clickable" onclick="showAlert('작게 글씨가 써져 있다.[2=4]')"></div>
+</div>
+
+<!-- Password Modal -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <p>비밀번호를 입력하세요:</p>
+        <input type="text" id="passwordInput">
+        <button onclick="checkPassword()">확인</button>
+    </div>
+</div>
+
+<!-- Minigame Containers -->
+<div id="circle-game-wrapper">
+    <div id="circle-game-container">
+        <div id="cg-player"></div>
+        <div id="cg-enemy"></div>
+        <div class="cg-wall" style="left: 100px; top: 100px; width: 20px; height: 200px;"></div>
+        <div class="cg-wall" style="right: 100px; top: 100px; width: 20px; height: 200px;"></div>
+        <div class="cg-wall" style="left: 200px; top: 180px; width: 200px; height: 20px;"></div>
+    </div>
+    <div id="cg-info">생존 시간: <span id="cg-timer">0</span>초</div>
+</div>
+
+<div id="parkour-game-container">
+    <div id="parkour-player"></div>
+    <div class="platform" style="bottom: 50px; left: 0px; width: 150px;"></div>
+    <div class="platform" style="bottom: 130px; left: 200px; width: 100px;"></div>
+    <div class="platform" style="bottom: 130px; left: 380px; width: 100px;"></div>
+    <div class="spike" style="bottom: 150px; left: 420px;"></div>
+    <div class="platform moving-h" data-range-start="520" data-range-end="650" data-speed="2" style="bottom: 220px; left: 520px; width: 100px;"></div>
+    <div class="platform" style="bottom: 220px; left: 750px; width: 100px;"></div>
+    <div id="parkour-goal" style="bottom: 300px; left: 880px;"></div>
+</div>
+
+
+<script>
+    let currentScene = 1;
+    let correctPassword = '';
+    let stageToUnlock = 0;
+
+    const introductionScreen = document.getElementById('introduction-screen');
+    const endingScreen = document.getElementById('ending-screen');
+    const startButton = document.getElementById('start-button');
+    const restartButton = document.getElementById('restart-button');
+
+    startButton.addEventListener('click', () => {
+        introductionScreen.style.display = 'none';
+        document.getElementById('scene1').style.display = 'block';
+    });
+
+    restartButton.addEventListener('click', () => {
+        location.reload();
+    });
+
+    function showAlert(message) {
+        alert(message);
+    }
+
+    function showPasswordModal(stage, password) {
+        stageToUnlock = stage;
+        correctPassword = password;
+        document.getElementById('passwordModal').style.display = 'block';
+        document.getElementById('passwordInput').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('passwordModal').style.display = 'none';
+        document.getElementById('passwordInput').value = '';
+    }
+
+    function checkPassword() {
+        const input = document.getElementById('passwordInput').value;
+        if (input === correctPassword) {
+            alert('정답입니다!');
+            closeModal();
+            changeScene(stageToUnlock + 1);
+        } else {
+            alert('틀렸습니다.');
+        }
+    }
+
+    function changeScene(sceneNumber) {
+        if (currentScene > 0 && document.getElementById('scene' + currentScene)) {
+           document.getElementById('scene' + currentScene).style.display = 'none';
+        }
+        
+        if (sceneNumber > 3) {
+            endingScreen.style.display = 'flex';
+            return;
+        }
+
+        document.getElementById('scene' + sceneNumber).style.display = 'block';
+        currentScene = sceneNumber;
+    }
+
+    // ========================================================
+    // Minigame 1: Yellow Circle Dodge
+    // ========================================================
+    function startCircleGame() {
+        alert("서치라이트가 나를 발견했다! 벽을 이용해 12초 동안 피해야 한다!");
+        const gameWrapper = document.getElementById('circle-game-wrapper');
+        const gameContainer = document.getElementById('circle-game-container');
+        const player = document.getElementById('cg-player');
+        const enemy = document.getElementById('cg-enemy');
+        const timerDisplay = document.getElementById('cg-timer');
+        const walls = gameContainer.querySelectorAll('.cg-wall');
+        
+        let playerX, playerY;
+        let enemyX, enemyY;
+        let enemySpeedX, enemySpeedY;
+        let gameInterval;
+        let timerInterval;
+        let keys = {};
+        const playerSpeed = 7;
+        
+        gameWrapper.style.display = 'flex';
+        playerX = gameContainer.offsetWidth / 2 - player.offsetWidth / 2;
+        playerY = gameContainer.offsetHeight - player.offsetHeight - 5;
+        
+        const safeZoneRadius = 150;
+        do {
+            enemyX = Math.random() * (gameContainer.offsetWidth - enemy.offsetWidth);
+            enemyY = Math.random() * (gameContainer.offsetHeight - enemy.offsetHeight);
+        } while (Math.sqrt(Math.pow(enemyX - playerX, 2) + Math.pow(enemyY - playerY, 2)) < safeZoneRadius);
+
+        enemySpeedX = (Math.random() > 0.5 ? 1 : -1) * 6;
+        enemySpeedY = (Math.random() > 0.5 ? 1 : -1) * 6;
+        let secondsSurvived = 0;
+        timerDisplay.textContent = 0;
+
+        const onKeyDown = (e) => { keys[e.key.toLowerCase()] = true; };
+        const onKeyUp = (e) => { keys[e.key.toLowerCase()] = false; };
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('keyup', onKeyUp);
+
+        const endGame = (isWin) => {
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            window.removeEventListener('keydown', onKeyDown);
+            window.removeEventListener('keyup', onKeyUp);
+            gameWrapper.style.display = 'none';
+            if (isWin) {
+                alert("무사히 피했다! 내가 나무에 숨으니 서치라이트가 나를 놓쳤다. 나무에 빛이 비치니 심은 날이라 적혀 있다.");
+            } else {
+                alert("붙잡혔다! 다시 시도해 보자.");
             }
+        };
 
-            startGameBtn.addEventListener('click', () => {
-                // ★ 디버깅 메시지 2: 버튼 클릭이 인식되었는지 확인
-                console.log("'게임 시작' 버튼 클릭됨!");
+        timerInterval = setInterval(() => {
+            secondsSurvived++;
+            timerDisplay.textContent = secondsSurvived;
+            if (secondsSurvived >= 12) endGame(true);
+        }, 1000);
 
-                const grade = playerGradeInput.value.trim();
-                const p_class = playerClassInput.value.trim();
-                const name = playerNameInput.value.trim();
+        gameInterval = setInterval(() => {
+            let nextPlayerX = playerX, nextPlayerY = playerY;
 
-                if (!grade || !p_class || !name) {
-                    alert('학년, 반, 이름을 모두 입력해주세요!');
-                    return;
+            if (keys['w']) nextPlayerY -= playerSpeed;
+            if (keys['s']) nextPlayerY += playerSpeed;
+            if (keys['a']) nextPlayerX -= playerSpeed;
+            if (keys['d']) nextPlayerX += playerSpeed;
+
+            if (nextPlayerX < 0) nextPlayerX = 0;
+            if (nextPlayerX > gameContainer.offsetWidth - 40) nextPlayerX = gameContainer.offsetWidth - 40;
+            if (nextPlayerY < 0) nextPlayerY = 0;
+            if (nextPlayerY > gameContainer.offsetHeight - 40) nextPlayerY = gameContainer.offsetHeight - 40;
+
+            let collisionX = false, collisionY = false;
+            walls.forEach(wall => {
+                if (nextPlayerX < wall.offsetLeft + wall.offsetWidth && nextPlayerX + 40 > wall.offsetLeft &&
+                    playerY < wall.offsetTop + wall.offsetHeight && playerY + 40 > wall.offsetTop) {
+                    collisionX = true;
                 }
+                if (playerX < wall.offsetLeft + wall.offsetWidth && playerX + 40 > wall.offsetLeft &&
+                    nextPlayerY < wall.offsetTop + wall.offsetHeight && nextPlayerY + 40 > wall.offsetTop) {
+                    collisionY = true;
+                }
+            });
+
+            if (!collisionX) playerX = nextPlayerX;
+            if (!collisionY) playerY = nextPlayerY;
+            
+            if (enemyX + enemySpeedX < 0 || enemyX + enemySpeedX > gameContainer.offsetWidth - 100) enemySpeedX *= -1;
+            if (enemyY + enemySpeedY < 0 || enemyY + enemySpeedY > gameContainer.offsetHeight - 100) enemySpeedY *= -1;
+            
+            enemyX += enemySpeedX;
+            enemyY += enemySpeedY;
+            
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+            enemy.style.left = enemyX + 'px';
+            enemy.style.top = enemyY + 'px';
+
+            if (playerX < enemyX + 100 && playerX + 40 > enemyX && playerY < enemyY + 100 && playerY + 40 > enemyY) {
+                endGame(false);
+            }
+        }, 20);
+    }
+
+    // ========================================================
+    // Minigame 2: Parkour
+    // ========================================================
+    function startParkourGame() {
+        alert("저기 비밀번호가 적힌 금색 쪽지가 있다! 가시와 움직이는 발판을 피해 도착하면 비밀번호를 볼 수 있다! (점프: W)");
+        const gameContainer = document.getElementById('parkour-game-container');
+        gameContainer.style.display = 'block';
+
+        const player = document.getElementById('parkour-player');
+        const goal = document.getElementById('parkour-goal');
+        const allPlatforms = document.querySelectorAll('.platform');
+        const spikes = document.querySelectorAll('.spike');
+        
+        const startX = 50, startY = 100;
+        let playerX = startX, playerY = startY;
+        let velocityX = 0, velocityY = 0;
+        let onGround = false;
+        
+        const moveSpeed = 4, jumpPower = 11, gravity = 0.5;
+        let keys = {}, gameLoopId = null;
+
+        const movingPlatforms = [];
+        document.querySelectorAll('.moving-h, .moving-v').forEach(p => {
+            const isVertical = p.classList.contains('moving-v');
+            movingPlatforms.push({
+                el: p, isVertical: isVertical, speed: parseFloat(p.dataset.speed), dir: 1,
+                range: [parseInt(p.dataset.rangeStart), parseInt(p.dataset.rangeEnd)],
+                currentPos: parseFloat(isVertical ? p.style.bottom : p.style.left)
+            });
+        });
+
+        const resetPlayer = () => { playerX = startX; playerY = startY; velocityY = 0; velocityX = 0; };
+        const onKeyDown = (e) => { keys[e.key.toLowerCase()] = true; };
+        const onKeyUp = (e) => { keys[e.key.toLowerCase()] = false; };
+        
+        const cleanupAndExit = (message) => {
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+            gameLoopId = null;
+            document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('keyup', onKeyUp);
+            gameContainer.style.display = 'none';
+            alert(message);
+        };
+        
+        resetPlayer();
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('keyup', onKeyUp);
+
+        function parkourLoop() {
+            movingPlatforms.forEach(mp => {
+                mp.currentPos += mp.speed * mp.dir;
+                if (mp.currentPos > mp.range[1] || mp.currentPos < mp.range[0]) mp.dir *= -1;
+                if (mp.isVertical) mp.el.style.bottom = mp.currentPos + 'px';
+                else mp.el.style.left = mp.currentPos + 'px';
+            });
+
+            velocityX = 0;
+            if (keys['a']) velocityX = -moveSpeed;
+            if (keys['d']) velocityX = moveSpeed;
+            if (keys['w'] && onGround) { velocityY = jumpPower; onGround = false; }
+
+            velocityY -= gravity;
+            let playerY_prev = playerY;
+            playerX += velocityX;
+            playerY += velocityY;
+            onGround = false;
+
+            allPlatforms.forEach(platform => {
+                const pLeft = platform.offsetLeft, pRight = pLeft + platform.offsetWidth;
+                const pBottom = parseFloat(platform.style.bottom), pTop = pBottom + platform.offsetHeight;
                 
-                playerInfoDiv.textContent = `도전자: ${grade}학년 ${p_class}반 ${name}`;
-
-                startScreen.classList.add('hidden');
-                gameContainer.classList.remove('hidden');
-                inventory.classList.remove('hidden');
-                timerDiv.classList.remove('hidden');
-
-                initGame();
+                if (playerY_prev >= pTop && playerY <= pTop && playerX + 30 > pLeft && playerX < pRight) {
+                    onGround = true; velocityY = 0; playerY = pTop;
+                    const movingData = movingPlatforms.find(mp => mp.el === platform);
+                    if (movingData && !movingData.isVertical) playerX += movingData.speed * movingData.dir;
+                }
             });
             
-            function updateTimer() {
-                const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-                const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
-                const seconds = String(elapsedTime % 60).padStart(2, '0');
-                timerDiv.textContent = `${minutes}:${seconds}`;
-            }
-            
-            function showChildProblem() {
-                if (hints.has("01")) { alert("이미 힌트를 확인했습니다."); return; }
-                modalContent.innerHTML = `<h2>친구의 쪽지</h2><p>"내 생일은 1월이야. 이걸로 첫 번째 힌트를 풀어봐!"</p><button id="close-modal-btn">확인</button>`;
-                showModal();
-                document.getElementById('close-modal-btn').onclick = () => {
-                    addHint("친구의 생일 = 01"); hints.add("01"); closeModal();
-                };
-            }
+            if (playerY < 0) { resetPlayer(); gameLoopId = requestAnimationFrame(parkourLoop); return; }
 
-            function startMissileGame() {
-                if (hints.has("15")) { alert("게임은 이미 클리어했습니다."); return; }
-                modalContent.innerHTML = `
-                    <h2>미사일 게임</h2><p>날아오는 운석을 모두 파괴하세요!</p>
-                    <canvas id="game-canvas" width="480" height="320" style="background-color: #1a1a2e;"></canvas>
-                    <div>키보드: ← → / 스페이스바</div>
-                    <button id="giveup-missile-game" class="cancel-btn">포기하고 닫기</button>`;
-                showModal();
-                document.getElementById('giveup-missile-game').onclick = () => { stopMissileGame(); closeModal(); };
-                setTimeout(runGame, 50);
-            }
-
-            function showEscapeModal() {
-                modalContent.innerHTML = `
-                    <h2>비밀번호 입력</h2><p>획득한 힌트를 조합하여 비밀번호를 입력하세요.</p>
-                    <input type="text" id="password-input" maxlength="4" placeholder="4자리 숫자" autocomplete="off">
-                    <button id="submit-password">탈출 시도</button><button id="cancel-escape" class="cancel-btn">취소</button>`;
-                showModal();
-                document.getElementById('submit-password').onclick = () => {
-                    if (document.getElementById('password-input').value === "0115") {
-                        clearInterval(timerInterval);
-                        const finalTime = timerDiv.textContent;
-                        alert(`정답! 문이 열립니다. 탈출 성공!\n\n소요시간: ${finalTime}`);
-                        window.location.reload();
-                    } else { alert("비밀번호가 틀렸습니다."); }
-                };
-                document.getElementById('cancel-escape').onclick = closeModal;
-            }
-
-            function addHint(text) {
-                if ([...hintList.children].some(li => li.textContent === text)) return;
-                const newHint = document.createElement('li');
-                newHint.textContent = text;
-                hintList.appendChild(newHint);
-            }
-
-            function showModal() { modalContainer.classList.remove('hidden'); }
-            function closeModal() { modalContainer.classList.add('hidden'); }
-            
-            function stopMissileGame() {
-                if (missileGame.isRunning) {
-                    document.removeEventListener('keydown', missileGame.listeners.keydown);
-                    document.removeEventListener('keyup', missileGame.listeners.keyup);
-                    cancelAnimationFrame(missileGame.animationFrameId);
-                    missileGame.isRunning = false;
-                    missileGame.listeners.keydown = null;
-                    missileGame.listeners.keyup = null;
+            spikes.forEach(spike => {
+                if (playerX < spike.offsetLeft + 20 && playerX + 30 > spike.offsetLeft &&
+                    playerY < parseFloat(spike.style.bottom) + 20 && playerY + 30 > parseFloat(spike.style.bottom)) {
+                    alert('가시에 찔렸다! 처음으로 돌아갑니다.');
+                    resetPlayer(); gameLoopId = requestAnimationFrame(parkourLoop); return;
                 }
+            });
+
+            if (playerX < goal.offsetLeft + 50 && playerX + 30 > goal.offsetLeft &&
+                playerY < parseFloat(goal.style.bottom) + 50 && playerY + 30 > parseFloat(goal.style.bottom)) {
+                cleanupAndExit('성공! 쪽지에는 [963*] 이라고 적혀있다.'); return;
             }
             
-            function runGame() {
-                const canvas = document.getElementById('game-canvas');
-                if (!canvas || missileGame.isRunning) return;
-                const ctx = canvas.getContext('2d');
-                missileGame.isRunning = true;
-                let player = { x: canvas.width / 2 - 15, y: canvas.height - 30, width: 30, height: 20, speed: 5 };
-                let bullets = []; let targets = []; let keys = {};
-                for(let i=0; i<5; i++) { targets.push({x: 50 + i * 80, y: 30, width: 40, height: 20, active: true}); }
-                missileGame.listeners.keydown = (e) => { keys[e.code] = true; };
-                missileGame.listeners.keyup = (e) => { keys[e.code] = false; };
-                document.addEventListener('keydown', missileGame.listeners.keydown);
-                document.addEventListener('keyup', missileGame.listeners.keyup);
-                function gameLoop() {
-                    if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
-                    if (keys['ArrowRight'] && player.x < canvas.width - player.width) player.x += player.speed;
-                    if (keys['Space']) {
-                        if (bullets.length < 5) { bullets.push({x: player.x + player.width/2 - 2.5, y: player.y, width: 5, height: 10, speed: 7}); }
-                        keys['Space'] = false;
-                    }
-                    for (let bIndex = bullets.length - 1; bIndex >= 0; bIndex--) {
-                        let bullet = bullets[bIndex]; bullet.y -= bullet.speed;
-                        if (bullet.y < 0) { bullets.splice(bIndex, 1); continue; }
-                        for (let tIndex = targets.length - 1; tIndex >= 0; tIndex--) {
-                            let target = targets[tIndex];
-                            if (target.active && bullet.x < target.x + target.width && bullet.x + bullet.width > target.x &&
-                                bullet.y < target.y + target.height && bullet.y + bullet.height > target.y) {
-                                target.active = false; bullets.splice(bIndex, 1); break; 
-                            }
-                        }
-                    }
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.fillStyle = '#16a085'; ctx.fillRect(player.x, player.y, player.width, player.height);
-                    ctx.fillStyle = '#f1c40f'; bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
-                    ctx.fillStyle = '#e74c3c'; targets.forEach(t => { if(t.active) ctx.fillRect(t.x, t.y, t.width, t.height); });
-                    if (targets.every(t => !t.active)) {
-                        stopMissileGame();
-                        setTimeout(() => {
-                            alert("게임 클리어! 두 번째 힌트 '15'를 획득했습니다.");
-                            addHint("게임 클리어 점수 = 15"); hints.add("15"); closeModal();
-                        }, 200);
-                        return;
-                    }
-                    if (missileGame.isRunning) {
-                        missileGame.animationFrameId = requestAnimationFrame(gameLoop);
-                    }
-                }
-                gameLoop();
-            }
-        });
-    </script>
+            player.style.left = playerX + 'px';
+            player.style.bottom = playerY + 'px';
+            gameLoopId = requestAnimationFrame(parkourLoop);
+        }
+        gameLoopId = requestAnimationFrame(parkourLoop);
+    }
+</script>
 
 </body>
 </html>
